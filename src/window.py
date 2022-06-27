@@ -1,5 +1,3 @@
-from itertools import count
-from urllib import response
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton,
     QTableWidget, QTableWidgetItem, QHeaderView, QSpacerItem,
@@ -7,7 +5,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt
 
-import requests, json
+import backend
 
 API_URL = 'https://api.nationalize.io/'
 
@@ -58,7 +56,7 @@ class Window(QWidget):
             QMessageBox.critical(self, 'Error', 'Enter a name to search for matches.', QMessageBox.Ok)
             return
 
-        countries = self.search_name(search_text)
+        countries = backend.search_name(search_text)
         if not countries:
             QMessageBox.information(self, 'Search finished', 'No matches found for the name.')
             return
@@ -68,19 +66,3 @@ class Window(QWidget):
             self.results_table.insertRow(row)
             self.results_table.setItem(row, 0, QTableWidgetItem(country['country_id']))
             self.results_table.setItem(row, 1, QTableWidgetItem(str(country['probability'])))
-
-    def search_name(self, name: str) -> list:
-        countries = []
-        if not name:
-            return countries
-
-        try:
-            response = requests.get(API_URL, params={'name': name})
-            if response.status_code == 200:
-                data = json.loads(response.text)
-                if data:
-                    countries = data['country']
-            return countries
-        except:
-            print('An error ocurred.')
-            return countries
